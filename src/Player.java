@@ -2,32 +2,33 @@ import java.util.concurrent.Semaphore;
 
 public class Player extends Thread {
     private String playerName;
-    private int playerNumber;
     private Ball ball;
-    private Semaphore[] s ; // what if less semaphores passed!?
+    private boolean alive = true;
+    private Semaphore in ;
+    private Semaphore out;
 
-    public int getPlayerNumber(){return  playerNumber;}
+    public void stopRunning(){ //synchronized!?
+        alive = false;
+    }
+
     public String getPlayerName (){return playerName;}
 
-    public Player(String playerName,int playerNumber, Ball ball, Semaphore[] s){
+    public Player(String playerName, Ball ball, Semaphore in, Semaphore out){
         this.playerName = playerName;
-        this.playerNumber = playerNumber;
-        this.s = s;
+        this.in = in;
+        this.out = out;
         this.ball = ball;
         start();
     }
 
     @Override
     public void run() {
-        while(true){
+        while(alive){
             try{
-                s[0].acquire();
-                if(ball.getPlayerNum()!=playerNumber)
-                {
-                    ball.hit(this);
-                   // sleep(1000);
-                }
-                s[0].release();
+                in.acquire();
+                ball.hit(this);
+                sleep(1000);
+                out.release();
             }
             catch (InterruptedException ex){
                 ex.printStackTrace();
