@@ -3,15 +3,21 @@ import java.util.concurrent.Semaphore;
 public class Player extends Thread {
     private String playerName;
     private Ball ball;
-    private boolean alive = true;
+    private boolean run = true;
     private Semaphore in ;
     private Semaphore out;
 
-    public void stopRunning(){ //synchronized!?
-        alive = false;
+    public synchronized void stopRunning(){
+        run = false;
     }
+	
+	public synchronized boolean shouldRunning(){
+		return run;
+	}
 
-    public String getPlayerName (){return playerName;}
+    public String getPlayerName (){
+		return playerName;
+	}
 
     public Player(String playerName, Ball ball, Semaphore in, Semaphore out){
         this.playerName = playerName;
@@ -23,7 +29,7 @@ public class Player extends Thread {
 
     @Override
     public void run() {
-        while(alive){
+        while(shouldRunning()){
             try{
                 in.acquire();
                 ball.hit(this);
